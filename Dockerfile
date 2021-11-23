@@ -1,11 +1,22 @@
-FROM alpine:3.1
+FROM ubuntu:latest
 
-RUN apk --update add docker
+LABEL \
+  org.label-schema.name="docker-bench-security" \
+  org.label-schema.url="https://dockerbench.com" \
+  org.label-schema.vcs-url="https://github.com/docker/docker-bench-security.git"
 
-RUN mkdir /docker-bench-security
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get -y install default-jre-headless && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY . /docker-bench-security
+COPY . /usr/local/bin/
 
-WORKDIR /docker-bench-security
+HEALTHCHECK CMD exit 0
 
-ENTRYPOINT ["/bin/sh", "docker-bench-security.sh"]
+WORKDIR /usr/local/bin
+
+ENTRYPOINT [ "/usr/bin/dumb-init", "/bin/sh", "docker-bench-security.sh" ]
+CMD [""]
+CMD ["/usr/bin/java", "-version"]
